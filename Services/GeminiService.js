@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -6,17 +6,43 @@ dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const SYSTEM_PROMPT = `
-Usted es un asistente social empático, cálido y respetuoso de la iglesia San Cayetano en Rosario, Argentina.
-Su objetivo es ayudar a personas (muchas veces mayores o con poca experiencia tecnológica) a armar un Currículum Vitae profesional para oficios como albañilería, limpieza, gastronomía, cuidado de personas, etc.
+Usted es un orientador laboral empático, cálido y sumamente paciente de la parroquia San Cayetano en Rosario, Argentina. Su misión es guiar al usuario paso a paso para armar un Currículum Vitae formal, competitivo y detallado.
 
-REGLAS DE ORO PARA LA CONVERSACIÓN:
-1. Trato: Trate al usuario de "Usted", pero de forma muy cálida, amigable y paciente, usando modismos neutros de Argentina. Haga que se sientan escuchados y respetados.
-2. UNA SOLA PREGUNTA A LA VEZ: Esto es crucial. Nunca haga múltiples preguntas en un solo mensaje. Vaya paso a paso (primero pregunte el nombre, espere respuesta; luego de qué trabaja, espere; luego dónde vive, etc.). Si el usuario se abruma, abandonará.
-3. Traductor de Oficios: Si el usuario responde de forma muy informal (ej: "hago changas de albañil con mi sobrino"), acéptelo cálidamente en su respuesta de chat, pero internamente vaya traduciéndolo a lenguaje formal para el CV (ej: "Ayudante de albañilería con experiencia en obras").
-4. Acotar la Zona: Como el proyecto es para Rosario y alrededores, intente extraer o preguntar el barrio/zona específica (ej: Zona Norte, Empalme Graneros, Centro, Funes, Villa Gobernador Gálvez) para que los filtros de la cartelera funcionen correctamente.
+REGLAS DE ORO DE LA CONVERSACIÓN:
+1. BREVEDAD (ESTILO WHATSAPP): Sus mensajes deben ser de máximo 1 o 2 oraciones. Cortos, directos y amigables.
+2. EMPATÍA DE GÉNERO DINÁMICA: Detecte el género del usuario por su nombre o sus palabras y mantenga la concordancia de género estricta (ej: "bienvenida", "organizada").
+3. TONO: Trate al usuario de "usted", con vocabulario cálido y rioplatense (ej: "Contame", "Bárbaro", "¡Qué alegría!").
+4. ¡UNA SOLA PREGUNTA ESPECÍFICA POR VEZ! No amontone preguntas en un solo mensaje.
 
-INSTRUCCIONES DE FORMATO:
-Cuando considere que ya tiene la información básica necesaria (Nombre, Teléfono, Zona, Rubro, y algo de experiencia o habilidades), dé por terminada la entrevista completando la variable is_interview_complete a true y llenando cv_data.
+GUION DE ENTREVISTA OBLIGATORIO (PASO A PASO):
+
+FASE 1: DATOS DE CONTACTO
+- Pregunte el Nombre completo.
+- Pregunte el Teléfono y consulte si tiene WhatsApp.
+- Pregunte la Zona de residencia en Rosario.
+- Pregunte de forma OPCIONAL si tiene correo electrónico.
+
+FASE 2: EXPERIENCIA LABORAL
+- Pregunte cuál es su oficio o rubro principal.
+- Pídale la primera experiencia laboral. Debe recopilar 3 datos clave de cada experiencia:
+  1. Lugar o empresa.
+  2. Tareas específicas.
+  3. Fechas o período.
+- REGLA DE RIGIDEZ: Si el usuario da respuestas escuetas (ej: "Trabajé en una panadería"), repregunte cálidamente "¿En qué años fue y qué tareas hacías?" antes de avanzar.
+
+FASE 3: EDUCACIÓN Y CURSOS
+- Pregunte su nivel máximo de estudios formales, institución y año.
+- Pregunte si realizó algún curso (ej: electricidad, peluquería), dónde y en qué año.
+
+FASE 4: HABILIDADES, HERRAMIENTAS Y DISPONIBILIDAD
+- Pregunte por habilidades blandas o fuertes (ej: puntualidad).
+- Pregunte por herramientas propias o movilidad, adaptado al rubro.
+- Pregunte su expectativa laboral y disponibilidad horaria.
+
+REGLAS FINALES:
+- TRADUCTOR DE OFICIOS: Traduzca el lenguaje informal ("changas") a formal ("Trabajos independientes") en el JSON final.
+- No deje campos importantes vacíos a menos que el usuario indique que no tiene información.
+- Despídase con calidez deseando bendiciones de San Cayetano y cambie is_interview_complete a true.
 `;
 
 const responseSchema = {
@@ -24,29 +50,60 @@ const responseSchema = {
     properties: {
         is_interview_complete: {
             type: SchemaType.BOOLEAN,
-            description: "True si ya se recolectó la información suficiente para armar el CV."
+            description: "True SOLO si ya recopiló TODOS los datos requeridos."
         },
         message: {
             type: SchemaType.STRING,
-            description: "Respuesta conversacional al usuario (la siguiente pregunta o una despedida cálida indicando que el CV está listo)."
+            description: "El mensaje cálido del asistente para continuar la charla o despedirse."
         },
         cv_data: {
             type: SchemaType.OBJECT,
-            nullable: true,
-            description: "Datos del CV si la entrevista terminó, sino nulo.",
             properties: {
-                full_name: { type: SchemaType.STRING, description: "Nombre completo" },
-                phone: { type: SchemaType.STRING, description: "Teléfono de contacto" },
-                zone: { type: SchemaType.STRING, description: "Zona o barrio de Rosario" },
-                category: { type: SchemaType.STRING, description: "Rubro principal" },
-                professional_summary: { type: SchemaType.STRING, description: "Breve resumen profesional (2 o 3 líneas destacando puntos fuertes)" },
-                experience: { 
-                    type: SchemaType.ARRAY, 
-                    description: "Lista de experiencias o habilidades (cada una formalmente redactada)",
-                    items: { type: SchemaType.STRING } 
-                }
+                full_name: { type: SchemaType.STRING },
+                phone: { type: SchemaType.STRING },
+                email: { type: SchemaType.STRING },
+                zone: { type: SchemaType.STRING },
+                category: { type: SchemaType.STRING },
+                resumen_profesional: { type: SchemaType.STRING, description: "Un párrafo fuerte y formal." },
+                expectativa_laboral: { type: SchemaType.STRING },
+                experiencia_laboral: {
+                    type: SchemaType.ARRAY,
+                    items: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            puesto: { type: SchemaType.STRING },
+                            lugar_o_empresa: { type: SchemaType.STRING },
+                            periodo: { type: SchemaType.STRING },
+                            tareas_principales: {
+                                type: SchemaType.ARRAY,
+                                items: { type: SchemaType.STRING }
+                            }
+                        }
+                    }
+                },
+                educacion: {
+                    type: SchemaType.ARRAY,
+                    items: {
+                        type: SchemaType.OBJECT,
+                        properties: {
+                            nivel_estudios: { type: SchemaType.STRING },
+                            estado: { type: SchemaType.STRING },
+                            institucion: { type: SchemaType.STRING },
+                            periodo: { type: SchemaType.STRING }
+                        }
+                    }
+                },
+                habilidades: {
+                    type: SchemaType.ARRAY,
+                    items: { type: SchemaType.STRING }
+                },
+                herramientas_propias: {
+                    type: SchemaType.ARRAY,
+                    items: { type: SchemaType.STRING }
+                },
+                disponibilidad: { type: SchemaType.STRING }
             },
-            required: ["full_name", "phone", "zone", "category", "professional_summary", "experience"]
+            required: ["full_name", "phone", "zone", "category", "resumen_profesional", "expectativa_laboral", "experiencia_laboral", "educacion", "habilidades", "herramientas_propias", "disponibilidad"]
         }
     },
     required: ["is_interview_complete", "message"]
@@ -54,7 +111,6 @@ const responseSchema = {
 
 export default class GeminiService {
     static async processChat(messages) {
-        // Configuramos el modelo con System Instructions y Schema estructurado
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
             systemInstruction: SYSTEM_PROMPT,
@@ -65,29 +121,21 @@ export default class GeminiService {
             }
         });
 
-        // Mapear el historial del Frontend ({role: 'assistant'/'user', content: '...'}) 
-        // al formato de Gemini ({role: 'model'/'user', parts: [{text: '...'}]})
         const history = messages.slice(0, -1).map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
 
         const lastMessage = messages[messages.length - 1].content;
+        const chatSession = model.startChat({ history });
 
         try {
-            const chat = model.startChat({
-                history: history,
-            });
-
-            // Enviamos el último mensaje
-            const result = await chat.sendMessage(lastMessage);
-            const content = result.response.text();
-            
-            // Retornamos el JSON parseado garantizado por Structured Outputs
-            return JSON.parse(content);
+            const result = await chatSession.sendMessage([{ text: lastMessage }]);
+            const responseText = result.response.text();
+            return JSON.parse(responseText);
         } catch (error) {
             console.error("Error en GeminiService:", error);
-            throw new Error("No se pudo procesar la respuesta de la IA (Gemini).");
+            throw error;
         }
     }
 }

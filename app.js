@@ -19,9 +19,11 @@ app.get('/api/health', (req, res) => {
 // Rutas
 import chatRoutes from './Routes/chatRoutes.js';
 import profileRoutes from './Routes/profileRoutes.js';
+import adminRoutes from './Routes/adminRoutes.js';
 
 app.use('/api/chat', chatRoutes);
 app.use('/api/profiles', profileRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port}`);

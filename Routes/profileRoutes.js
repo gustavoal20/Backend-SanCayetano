@@ -29,6 +29,9 @@ router.post('/', ProfileController.createProfile);
 // Ver la cartelera de oficios publicados (Ruta 100% pública)
 router.get('/', ProfileController.getProfiles);
 
+// Ver un CV específico por ID
+router.get('/:id', ProfileController.getProfileById);
+
 // Cambiar estado de moderación (Ruta protegida para Administradores de la Iglesia)
 router.patch('/:id/status', requireAuth, requireAdmin, ProfileController.updateStatus);
 
