@@ -20,10 +20,12 @@ app.get('/api/health', (req, res) => {
 import chatRoutes from './Routes/chatRoutes.js';
 import profileRoutes from './Routes/profileRoutes.js';
 import adminRoutes from './Routes/adminRoutes.js';
+import prayerRoutes from './Routes/prayerRoutes.js';
 
 app.use('/api/chat', chatRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/prayers', prayerRoutes);
 
 app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port}`);

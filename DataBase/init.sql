@@ -1,7 +1,7 @@
 -- Script de inicialización de la base de datos para San Cayetano
 
-CREATE DATABASE IF NOT EXISTS san_cayetano_db;
-USE san_cayetano_db;
+-- La base de datos ya es provista por el hosting (ej. Filess.io)
+-- y se selecciona automáticamente en la conexión.
 
 -- Tabla de Usuarios
 CREATE TABLE IF NOT EXISTS Users (
@@ -42,3 +42,12 @@ INSERT IGNORE INTO Categories (name, description) VALUES
 ('Limpieza y Mantenimiento', 'Limpieza de hogares, oficinas, mantenimiento general.'),
 ('Gastronomía', 'Cocina, ayudante de cocina, bachero, mozo.'),
 ('Cuidado de Personas', 'Cuidado de niños, adultos mayores, acompañante terapéutico.');
+
+-- Tabla de Oraciones / Intenciones (Muro de Oraciones)
+CREATE TABLE IF NOT EXISTS Prayers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(100) NULL, -- NULL = Anónimo
+    category ENUM('gracias', 'trabajo', 'intencion') NOT NULL DEFAULT 'intencion',
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
