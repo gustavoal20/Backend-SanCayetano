@@ -1,4 +1,5 @@
-import { VertexAI, Type } from "@google-cloud/vertexai";
+import pkg from '@google-cloud/vertexai';
+const { VertexAI, Type } = pkg;
 import dotenv from 'dotenv';
 
 dotenv.config();
