@@ -50,62 +50,62 @@ REGLAS FINALES:
 `;
 
 export const responseSchema = {
-    type: Type.OBJECT,
+    type: "OBJECT",
     properties: {
         is_interview_complete: {
-            type: Type.BOOLEAN,
+            type: "BOOLEAN",
             description: "True SOLO si ya recopiló TODOS los datos requeridos."
         },
         message: {
-            type: Type.STRING,
+            type: "STRING",
             description: "El mensaje cálido del asistente para continuar la charla o despedirse."
         },
         cv_data: {
-            type: Type.OBJECT,
+            type: "OBJECT",
             properties: {
-                full_name: { type: Type.STRING },
-                phone: { type: Type.STRING },
-                email: { type: Type.STRING },
-                zone: { type: Type.STRING },
-                category: { type: Type.STRING },
-                resumen_profesional: { type: Type.STRING, description: "Un párrafo fuerte y formal." },
-                expectativa_laboral: { type: Type.STRING },
+                full_name: { type: "STRING" },
+                phone: { type: "STRING" },
+                email: { type: "STRING" },
+                zone: { type: "STRING" },
+                category: { type: "STRING" },
+                resumen_profesional: { type: "STRING", description: "Un párrafo fuerte y formal." },
+                expectativa_laboral: { type: "STRING" },
                 experiencia_laboral: {
-                    type: Type.ARRAY,
+                    type: "ARRAY",
                     items: {
-                        type: Type.OBJECT,
+                        type: "OBJECT",
                         properties: {
-                            puesto: { type: Type.STRING },
-                            lugar_o_empresa: { type: Type.STRING },
-                            periodo: { type: Type.STRING },
+                            puesto: { type: "STRING" },
+                            lugar_o_empresa: { type: "STRING" },
+                            periodo: { type: "STRING" },
                             tareas_principales: {
-                                type: Type.ARRAY,
-                                items: { type: Type.STRING }
+                                type: "ARRAY",
+                                items: { type: "STRING" }
                             }
                         }
                     }
                 },
                 educacion: {
-                    type: Type.ARRAY,
+                    type: "ARRAY",
                     items: {
-                        type: Type.OBJECT,
+                        type: "OBJECT",
                         properties: {
-                            nivel_estudios: { type: Type.STRING },
-                            estado: { type: Type.STRING },
-                            institucion: { type: Type.STRING },
-                            periodo: { type: Type.STRING }
+                            nivel_estudios: { type: "STRING" },
+                            estado: { type: "STRING" },
+                            institucion: { type: "STRING" },
+                            periodo: { type: "STRING" }
                         }
                     }
                 },
                 habilidades: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING }
+                    type: "ARRAY",
+                    items: { type: "STRING" }
                 },
                 herramientas_propias: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING }
+                    type: "ARRAY",
+                    items: { type: "STRING" }
                 },
-                disponibilidad: { type: Type.STRING }
+                disponibilidad: { type: "STRING" }
             },
             required: ["full_name", "phone", "zone", "category", "resumen_profesional", "expectativa_laboral", "experiencia_laboral", "educacion", "habilidades", "herramientas_propias", "disponibilidad"]
         }
