@@ -117,7 +117,7 @@ export default class GeminiService {
     static async processChat(messages) {
         // En Vertex AI instanciamos el modelo usando 'gemini-1.5-flash'
         const generativeModel = vertexAI.getGenerativeModel({
-            model: 'gemini-1.5-flash-001',
+            model: 'gemini-1.5-flash-002',
             systemInstruction: {
                 parts: [{ text: SYSTEM_PROMPT }]
             },
