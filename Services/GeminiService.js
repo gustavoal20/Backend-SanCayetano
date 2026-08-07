@@ -5,7 +5,7 @@ dotenv.config();
 
 // Inicializamos Vertex AI apuntando a tu proyecto de GCP
 const vertexAI = new VertexAI({
-    project: process.env.GCP_PROJECT_ID || 'gen-lang-client-0857616266',
+    project: process.env.GCP_PROJECT_ID || 'san-cayetano-backend',
     location: process.env.GCP_LOCATION || 'us-central1'
 });
 
