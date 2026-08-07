@@ -27,6 +27,6 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/prayers', prayerRoutes);
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Servidor corriendo en el puerto ${port}`);
 });
