@@ -1,9 +1,13 @@
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { VertexAI, Type } from "@google-cloud/vertexai";
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Inicializamos Vertex AI apuntando a tu proyecto de GCP
+const vertexAI = new VertexAI({
+    project: process.env.GCP_PROJECT_ID || 'gen-lang-client-0857616266',
+    location: process.env.GCP_LOCATION || 'us-central1'
+});
 
 export const SYSTEM_PROMPT = `
 Usted es un orientador laboral empático, cálido y sumamente paciente de la parroquia San Cayetano en Rosario, Argentina. Su misión es guiar al usuario paso a paso para armar un Currículum Vitae formal, competitivo y detallado.
@@ -45,62 +49,62 @@ REGLAS FINALES:
 `;
 
 export const responseSchema = {
-    type: SchemaType.OBJECT,
+    type: Type.OBJECT,
     properties: {
         is_interview_complete: {
-            type: SchemaType.BOOLEAN,
+            type: Type.BOOLEAN,
             description: "True SOLO si ya recopiló TODOS los datos requeridos."
         },
         message: {
-            type: SchemaType.STRING,
+            type: Type.STRING,
             description: "El mensaje cálido del asistente para continuar la charla o despedirse."
         },
         cv_data: {
-            type: SchemaType.OBJECT,
+            type: Type.OBJECT,
             properties: {
-                full_name: { type: SchemaType.STRING },
-                phone: { type: SchemaType.STRING },
-                email: { type: SchemaType.STRING },
-                zone: { type: SchemaType.STRING },
-                category: { type: SchemaType.STRING },
-                resumen_profesional: { type: SchemaType.STRING, description: "Un párrafo fuerte y formal." },
-                expectativa_laboral: { type: SchemaType.STRING },
+                full_name: { type: Type.STRING },
+                phone: { type: Type.STRING },
+                email: { type: Type.STRING },
+                zone: { type: Type.STRING },
+                category: { type: Type.STRING },
+                resumen_profesional: { type: Type.STRING, description: "Un párrafo fuerte y formal." },
+                expectativa_laboral: { type: Type.STRING },
                 experiencia_laboral: {
-                    type: SchemaType.ARRAY,
+                    type: Type.ARRAY,
                     items: {
-                        type: SchemaType.OBJECT,
+                        type: Type.OBJECT,
                         properties: {
-                            puesto: { type: SchemaType.STRING },
-                            lugar_o_empresa: { type: SchemaType.STRING },
-                            periodo: { type: SchemaType.STRING },
+                            puesto: { type: Type.STRING },
+                            lugar_o_empresa: { type: Type.STRING },
+                            periodo: { type: Type.STRING },
                             tareas_principales: {
-                                type: SchemaType.ARRAY,
-                                items: { type: SchemaType.STRING }
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING }
                             }
                         }
                     }
                 },
                 educacion: {
-                    type: SchemaType.ARRAY,
+                    type: Type.ARRAY,
                     items: {
-                        type: SchemaType.OBJECT,
+                        type: Type.OBJECT,
                         properties: {
-                            nivel_estudios: { type: SchemaType.STRING },
-                            estado: { type: SchemaType.STRING },
-                            institucion: { type: SchemaType.STRING },
-                            periodo: { type: SchemaType.STRING }
+                            nivel_estudios: { type: Type.STRING },
+                            estado: { type: Type.STRING },
+                            institucion: { type: Type.STRING },
+                            periodo: { type: Type.STRING }
                         }
                     }
                 },
                 habilidades: {
-                    type: SchemaType.ARRAY,
-                    items: { type: SchemaType.STRING }
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING }
                 },
                 herramientas_propias: {
-                    type: SchemaType.ARRAY,
-                    items: { type: SchemaType.STRING }
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING }
                 },
-                disponibilidad: { type: SchemaType.STRING }
+                disponibilidad: { type: Type.STRING }
             },
             required: ["full_name", "phone", "zone", "category", "resumen_profesional", "expectativa_laboral", "experiencia_laboral", "educacion", "habilidades", "herramientas_propias", "disponibilidad"]
         }
@@ -110,9 +114,12 @@ export const responseSchema = {
 
 export default class GeminiService {
     static async processChat(messages) {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: SYSTEM_PROMPT,
+        // En Vertex AI instanciamos el modelo usando 'gemini-1.5-flash'
+        const generativeModel = vertexAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            systemInstruction: {
+                parts: [{ text: SYSTEM_PROMPT }]
+            },
             generationConfig: {
                 temperature: 0.7,
                 responseMimeType: "application/json",
@@ -120,20 +127,21 @@ export default class GeminiService {
             }
         });
 
+        // Mapeo de historial compatible con Vertex AI
         const history = messages.slice(0, -1).map(msg => ({
             role: msg.role === 'assistant' ? 'model' : 'user',
             parts: [{ text: msg.content }]
         }));
 
         const lastMessage = messages[messages.length - 1].content;
-        const chatSession = model.startChat({ history });
+        const chatSession = generativeModel.startChat({ history });
 
         try {
             const result = await chatSession.sendMessage([{ text: lastMessage }]);
-            const responseText = result.response.text();
+            const responseText = result.response.candidates[0].content.parts[0].text;
             return JSON.parse(responseText);
         } catch (error) {
-            console.error("Error en GeminiService:", error);
+            console.error("Error en GeminiService (Vertex AI):", error);
             throw error;
         }
     }
